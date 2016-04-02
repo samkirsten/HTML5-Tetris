@@ -122,23 +122,26 @@ window.onload = function ()
             //context.fillStyle = 'red';
             //context.strokeStyle = 'white';
 
-            for (var i = 0; i < 10; ++i) {
-                for (var j = 0; j < 20; ++j){
-                    if ()
+
+
                     for (var y = 0; y < 4; ++y) {
                         for (var x = 0; x < 4; ++x) {
                             if (current[y][x]) {
                                 context.fillStyle = 'white';
                                 eraseBlock(currentX + x, currentY + y);
                                 for (var i = 0; i < 10; i++) {
-                                    eraseBlock(currentX + (i), currentY + y);
-                                    eraseBlock(currentX - (i), currentY + y);
+                                    for (var j = 0; j < 20; ++j) {
+                                        if(board[i][j] == 0) {
+                                            //eraseBlock(currentX + (i), currentY + y);
+                                            //eraseBlock(currentX - (i), currentY + y);
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            }
+
+
 
             context.fillStyle = 'red';
             context.strokeStyle = 'black';
@@ -164,7 +167,7 @@ window.onload = function ()
                     }
                 }
             }
-            console.log(board);
+            //console.log(board);
             newShape();
             render();
             makeTurn();
@@ -188,7 +191,7 @@ window.onload = function ()
                 }
             }
         }
-        console.log(current);
+        //console.log(current);
         currentX = 5;
         currentY = 0;
     }
@@ -197,7 +200,9 @@ window.onload = function ()
         switch (evt.keyCode) {
             case 39:
                 roundRectFill(200, 370, 50, 50, 10);
-                currentX++;
+                if(currentX < 8) {
+                    currentX++;
+                }
                 //context.stroke;
                 setTimeout(function(){
                     roundRect(200, 370, 50, 50, 10);
@@ -205,7 +210,9 @@ window.onload = function ()
                 break;
             case 37:
                 roundRectFill(60, 370, 50, 50, 10);
-                currentX--;
+                if(currentX > 0) {
+                    currentX--;
+                }
                 //context.stroke;
                 setTimeout(function(){
                     roundRect(60, 370, 50, 50, 10);
