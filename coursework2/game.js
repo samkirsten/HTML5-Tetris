@@ -1,7 +1,6 @@
 //https://github.com/dionyziz/gameCanvas-tetris/blob/master/js/tetris.js
 window.onload = function ()
 {
-
     /**
      * ************************
      *
@@ -13,17 +12,22 @@ window.onload = function ()
     var gameCanvas = document.getElementById("myCanvas");
     var controlCanvas = document.getElementById("controlCanvas");
     var renderCanvas = document.getElementById("myCanvas");
+    var leaderCanvas = document.getElementById('leaderCanvas');
 
     var context = gameCanvas.getContext("2d");
     var controlContext = controlCanvas.getContext("2d");
     var renderContext = renderCanvas.getContext("2d");
+    var leaderContext = leaderCanvas.getContext("2d");
 
     var BLOCK_W = 300 / 10, BLOCK_H = 600 / 20;
 
-    var xGameArray = [];
-    var yGameArray = [];
-    var board = []
 
+    var board = [];
+    var score = 0;
+
+    /**
+     var xGameArray = [];
+     var yGameArray = [];
     for (i = 0; i < 10; i++){
         xGameArray[i] = 0;
     }
@@ -31,16 +35,17 @@ window.onload = function ()
     for (i = 0; i < 20; i++){
         yGameArray[i] = 0;
     }
-
+**/
     //Stores each of the possible shapes as an Array
     var shapes = [
+
         [ 1, 1, 1, 1 ],
         [ 1, 1, 1, 0,
             1 ],
         [ 1, 1, 1, 0,
             0, 0, 1 ],
         [ 1, 1, 0, 0,
-            1, 1 ],
+            1, 1 ]
         [ 1, 1, 0, 0,
             0, 1, 1 ],
         [ 0, 1, 1, 0,
@@ -98,7 +103,7 @@ window.onload = function ()
         for ( var x = 0; x < 10; ++x ) {
             for ( var y = 0; y < 20; ++y ) {
                 if (board[ y ][ x ]) {
-                    renderContext.fillStyle = colors[ board[ y ][ x ]];
+                    renderContext.fillStyle = colors[ board[ y ][ x ] - 1];
                     drawBoard( x, y );
                 }
             }
@@ -117,13 +122,11 @@ window.onload = function ()
     }
 
     function makeTurn(){
-        if(currentY<18) {
+        checkLine();
+        if(checkTurn()) {
             //console.log(currentY);
             //context.fillStyle = 'red';
             //context.strokeStyle = 'white';
-
-
-
                     for (var y = 0; y < 4; ++y) {
                         for (var x = 0; x < 4; ++x) {
                             if (current[y][x]) {
@@ -154,6 +157,8 @@ window.onload = function ()
                 }
             }
             currentY++;
+            checkLine();
+            //checkLine();
             setTimeout(function () {
                 makeTurn();
             }, 100);
@@ -163,15 +168,70 @@ window.onload = function ()
                 for (var x = 0; x < 4; ++x) {
                     if (current[y][x]) {
                         //console.log(current[y][x]-1);
-                        board[y][x] = current[y][x] - 1;
+                        board[y + currentY][x + currentX] = current[y][x];
                     }
                 }
             }
             //console.log(board);
+            checkLine();
             newShape();
             render();
             makeTurn();
         }
+    }
+
+    function checkTurn(){
+        var safe = true;
+        if (currentY < 18){
+            for (var y = 0; y < 4; ++y) {
+                for (var x = 0; x < 4; ++x) {
+                    if (current[y][x]) {
+                        if(board[y + currentY + 1][x + currentX]){
+                            safe = false;
+                        }
+                    }
+                }
+            }
+        }
+        else{
+            safe = false;
+        }
+        if(safe){
+          return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    function checkLine(){
+        for(var y = 0; y < 20; y++){
+            var scan = true;
+            for(var x = 0; x < 10; x++){
+                if(!board[y][x]) {
+                    scan = false;
+                }
+            }
+            if(scan){
+                console.log("Bingo");
+                for(var x = 0; x < 10; x++){
+                   board[y][x] = 0;
+                    //board[y].splice(0, x);
+                }
+                //board.unshift(0);
+
+                for (var i = y; i > 0; i--) {
+                    for (var j = 0; j < 10; j++) {
+                        console.log(y);
+                        board[i][j] = board[i - 1][j];
+                    }
+                }
+                //console.log("move the fucking array");
+                score++;
+                console.log(score);
+            }
+        }
+        render();
     }
 
     function newShape() {
@@ -194,42 +254,43 @@ window.onload = function ()
         //console.log(current);
         currentX = 5;
         currentY = 0;
+        //console.log(board);
     }
 
     function whatKey(evt) {
         switch (evt.keyCode) {
             case 39:
-                roundRectFill(200, 370, 50, 50, 10);
+                roundRectFill(195, 370, 50, 50, 10);
                 if(currentX < 8) {
                     currentX++;
                 }
                 //context.stroke;
                 setTimeout(function(){
-                    roundRect(200, 370, 50, 50, 10);
+                    roundRect(195, 370, 50, 50, 10);
                 }, 200);
                 break;
             case 37:
-                roundRectFill(60, 370, 50, 50, 10);
+                roundRectFill(55, 370, 50, 50, 10);
                 if(currentX > 0) {
                     currentX--;
                 }
                 //context.stroke;
                 setTimeout(function(){
-                    roundRect(60, 370, 50, 50, 10);
+                    roundRect(55, 370, 50, 50, 10);
                 }, 200);
                 break;
             case 38:
-                roundRectFill(130, 300, 50, 50, 10);
+                roundRectFill(125, 300, 50, 50, 10);
                 //context.stroke;
                 setTimeout(function(){
-                    roundRect(130, 300, 50, 50, 10);
+                    roundRect(125, 300, 50, 50, 10);
                 }, 200);
                 break;
             case 40:
-                roundRectFill(130, 370, 50, 50, 10);
+                roundRectFill(125, 370, 50, 50, 10);
                 //context.stroke;
                 setTimeout(function(){
-                    roundRect(130, 370, 50, 50, 10);
+                    roundRect(125, 370, 50, 50, 10);
                 }, 200);
                 break;
         }
@@ -275,28 +336,49 @@ window.onload = function ()
 
     //http://www.scriptol.com/html5/canvas/rounded-rectangle.php
     function generateButtons(){
-        roundRect(130, 300, 50, 50, 10);
-        roundRect(130, 370, 50, 50, 10);
-        roundRect(60, 370, 50, 50, 10);
-        roundRect(200, 370, 50, 50, 10);
+        controlContext.font = "bold 40px Arial";
+        controlContext.fillText("Tetris",90,37);
+
+
+        //Control Buttons
+        roundRect(125, 300, 50, 50, 10);
+        roundRect(125, 370, 50, 50, 10);
+        roundRect(55, 370, 50, 50, 10);
+        roundRect(195, 370, 50, 50, 10);
 
         controlContext.font = "bold 14px Arial";
-        controlContext.fillText("Rotate",133,330);
+        controlContext.fillText("Rotate",128,330);
         controlContext.font = "bold 14px Arial";
-        controlContext.fillText("Left",72,400);
+        controlContext.fillText("Left",67,400);
         controlContext.font = "bold 14px Arial";
-        controlContext.fillText("Right",207,400);
+        controlContext.fillText("Right",202,400);
         controlContext.font = "bold 14px Arial";
-        controlContext.fillText("Down",136,400);
+        controlContext.fillText("Down",131,400);
 
-        roundRect(80, 460, 150, 50, 10);
-        roundRect(80, 530, 150, 50, 10);
+        //Menu Buttons
+        roundRect(75, 60, 150, 50, 10);
+        roundRect(75, 130, 150, 50, 10);
 
         controlContext.font = "bold 30px Arial";
-        controlContext.fillText("Start",122,496);
+        controlContext.fillText("Start",117,96);
 
         controlContext.font = "bold 23px Arial";
-        controlContext.fillText("Leaderboard",85,565);
+        controlContext.fillText("Leaderboard",80,165);
+
+        //Level Buttons
+        roundRect(15, 200, 70, 50, 10);
+        roundRect(115, 200, 70, 50, 10);
+        roundRect(215, 200, 70, 50, 10);
+
+        controlContext.font = "bold 19px Arial";
+        controlContext.fillText("Easy",27,230);
+
+        controlContext.font = "bold 19px Arial";
+        controlContext.fillText("Hard",127,230);
+
+        controlContext.font = "bold 19px Arial";
+        controlContext.fillText("Dank",227,230);
+
     }
 
     init();
