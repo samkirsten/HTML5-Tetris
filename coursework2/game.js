@@ -25,6 +25,8 @@ window.onload = function ()
     var board = [];
     var score = 0;
 
+    var full = false;
+
     /**
      var xGameArray = [];
      var yGameArray = [];
@@ -39,7 +41,8 @@ window.onload = function ()
     //Stores each of the possible shapes as an Array
     var shapes = [
 
-        [ 1, 1, 1, 1 ],
+        [0, 0, 0, 0,
+            1, 1, 1, 1],
         [ 1, 1, 1, 0,
             1 ],
         [ 1, 1, 1, 0,
@@ -123,26 +126,26 @@ window.onload = function ()
 
     function makeTurn(){
         checkLine();
-        if(checkTurn()) {
+        if (checkTurn()) {
             //console.log(currentY);
             //context.fillStyle = 'red';
             //context.strokeStyle = 'white';
-                    for (var y = 0; y < 4; ++y) {
-                        for (var x = 0; x < 4; ++x) {
-                            if (current[y][x]) {
-                                context.fillStyle = 'white';
-                                eraseBlock(currentX + x, currentY + y);
-                                for (var i = 0; i < 10; i++) {
-                                    for (var j = 0; j < 20; ++j) {
-                                        if(board[i][j] == 0) {
-                                            //eraseBlock(currentX + (i), currentY + y);
-                                            //eraseBlock(currentX - (i), currentY + y);
-                                        }
-                                    }
+            for (var y = 0; y < 4; ++y) {
+                for (var x = 0; x < 4; ++x) {
+                    if (current[y][x]) {
+                        context.fillStyle = 'white';
+                        eraseBlock(currentX + x, currentY + y);
+                        for (var i = 0; i < 10; i++) {
+                            for (var j = 0; j < 20; ++j) {
+                                if (board[i][j] == 0) {
+                                    //eraseBlock(currentX + (i), currentY + y);
+                                    //eraseBlock(currentX - (i), currentY + y);
                                 }
                             }
                         }
                     }
+                }
+            }
 
 
 
@@ -164,19 +167,24 @@ window.onload = function ()
             }, 100);
         }
         else {
-            for (var y = 0; y < 4; ++y) {
-                for (var x = 0; x < 4; ++x) {
-                    if (current[y][x]) {
-                        //console.log(current[y][x]-1);
-                        board[y + currentY][x + currentX] = current[y][x];
+            if (!full) {
+                for (var y = 0; y < 4; ++y) {
+                    for (var x = 0; x < 4; ++x) {
+                        if (current[y][x]) {
+                            //console.log(current[y][x]-1);
+                            board[y + currentY][x + currentX] = current[y][x];
+                        }
                     }
                 }
+                //console.log(board);
+                checkLine();
+                newShape();
+                if (checkLoss()) {
+                    console.log(currentY);
+                    render();
+                    makeTurn();
+                }
             }
-            //console.log(board);
-            checkLine();
-            newShape();
-            render();
-            makeTurn();
         }
     }
 
@@ -199,12 +207,13 @@ window.onload = function ()
         if(safe){
           return true;
         }
-        else{
+        else {
+            //full = true;
             return false;
         }
     }
 
-    function checkLine(){
+    function checkLine() {
         for(var y = 0; y < 20; y++){
             var scan = true;
             for(var x = 0; x < 10; x++){
@@ -222,19 +231,33 @@ window.onload = function ()
 
                 for (var i = y; i > 0; i--) {
                     for (var j = 0; j < 10; j++) {
-                        console.log(y);
+                        //console.log(y);
                         board[i][j] = board[i - 1][j];
                     }
                 }
-                //console.log("move the fucking array");
                 score++;
                 controlContext.clearRect(180, 458, 50, 50);
                 controlContext.font = "bold 23px Arial";
                 controlContext.fillText(score,188,482);
-                console.log(score);
+                //console.log(score);
             }
         }
         render();
+    }
+
+    function checkLoss() {
+        return true;
+    }
+
+    function rotateBlock() {
+        var tempPos = [];
+        for (var y = 0; y < 4; ++y) {
+            tempPos[y] = [];
+            for (var x = 0; x < 4; ++x) {
+               tempPos[y][x] = current[3 - x][y];
+            }
+        }
+        current = tempPos;
     }
 
     function newShape() {
@@ -264,7 +287,24 @@ window.onload = function ()
         switch (evt.keyCode) {
             case 39:
                 roundRectFill(195, 370, 50, 50, 10);
-                if(currentX < 8) {
+                var offSet = 0;
+                var tempSet = 0;
+                    for (var y = 0; y < 4; ++y) {
+                            if (current[y][2] > 0) {
+                                tempSet++;
+                            }
+                            if (current[y][3] > 0) {
+                                tempSet++;
+                            }
+                        
+                        if (tempSet > offSet) {
+                            offSet = tempSet;
+                        }
+                        console.log(offSet);
+                        tempSet = 0;
+                    }
+                    //console.log(offSet);
+                if ((currentX + (offSet)) < 8) {
                     currentX++;
                 }
                 //context.stroke;
@@ -285,6 +325,7 @@ window.onload = function ()
             case 38:
                 roundRectFill(125, 300, 50, 50, 10);
                 //context.stroke;
+                rotateBlock();
                 setTimeout(function(){
                     roundRect(125, 300, 50, 50, 10);
                 }, 200);
@@ -292,6 +333,7 @@ window.onload = function ()
             case 40:
                 roundRectFill(125, 370, 50, 50, 10);
                 //context.stroke;
+                currentY++;
                 setTimeout(function(){
                     roundRect(125, 370, 50, 50, 10);
                 }, 200);
@@ -380,7 +422,7 @@ window.onload = function ()
         controlContext.fillText("Hard",127,230);
 
         controlContext.font = "bold 19px Arial";
-        controlContext.fillText("Dank",227,230);
+        controlContext.fillText("****",227,230);
 
         //Score
 
