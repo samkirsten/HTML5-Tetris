@@ -45,7 +45,7 @@ window.onload = function ()
         [ 1, 1, 1, 0,
             0, 0, 1 ],
         [ 1, 1, 0, 0,
-            1, 1 ]
+            1, 1 ],
         [ 1, 1, 0, 0,
             0, 1, 1 ],
         [ 0, 1, 1, 0,
@@ -228,6 +228,9 @@ window.onload = function ()
                 }
                 //console.log("move the fucking array");
                 score++;
+                controlContext.clearRect(180, 458, 50, 50);
+                controlContext.font = "bold 23px Arial";
+                controlContext.fillText(score,188,482);
                 console.log(score);
             }
         }
@@ -378,6 +381,15 @@ window.onload = function ()
 
         controlContext.font = "bold 19px Arial";
         controlContext.fillText("Dank",227,230);
+
+        //Score
+
+        controlContext.font = "bold 23px Arial";
+        controlContext.fillText("Score: ",110,480);
+        controlContext.font = "bold 23px Arial";
+        controlContext.fillText("0",188,482);
+
+
 
     }
 
