@@ -166,7 +166,7 @@ window.onload = function () {
                 //checkLine();
                 setTimeout(function () {
                     makeTurn();
-                }, 100);
+                }, 300);
             }
             else {
                 if (!full) {
@@ -384,6 +384,7 @@ window.onload = function () {
                 //console.log(offSet);
                 if ((currentX + (offSet)) < 8) {
                     currentX++;
+                    render();
                 }
                 //context.stroke;
                 setTimeout(function () {
@@ -394,6 +395,7 @@ window.onload = function () {
                 roundRectFill(55, 370, 50, 50, 10);
                 if (currentX > 0) {
                     currentX--;
+                    render();
                 }
                 //context.stroke;
                 setTimeout(function () {
@@ -415,7 +417,10 @@ window.onload = function () {
             case 40:
                 roundRectFill(125, 370, 50, 50, 10);
                 //context.stroke;
-                currentY++;
+                if(currentY < 17) {
+                    currentY++;
+                    render();
+                }
                 setTimeout(function () {
                     roundRect(125, 370, 50, 50, 10);
                 }, 200);
