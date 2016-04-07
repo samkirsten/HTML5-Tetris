@@ -20,12 +20,14 @@ window.onload = function () {
 
     var BLOCK_W = 300 / 10, BLOCK_H = 600 / 20;
 
-
     var board = [];
     var score = 0;
 
     var full = false;
     var ycount = 0;
+
+    var isStarted = false;
+    var isLeadVisible = false;
 
     /**
      var xGameArray = [];
@@ -124,10 +126,10 @@ window.onload = function () {
         }
     }
 
-    function makeTurn() {
+    function makeTurn(){ 
         checkLine();
         if (ycount < 2) {
-            console.log("shit goes down");
+            //console.log("shit goes down");
             if (checkTurn() && !checkLoss()) {
                 //console.log(currentY);
                 //context.fillStyle = 'red';
@@ -137,14 +139,6 @@ window.onload = function () {
                         if (current[y][x]) {
                             context.fillStyle = 'white';
                             eraseBlock(currentX + x, currentY + y);
-                            for (var i = 0; i < 10; i++) {
-                                for (var j = 0; j < 20; ++j) {
-                                    if (board[i][j] == 0) {
-                                        //eraseBlock(currentX + (i), currentY + y);
-                                        //eraseBlock(currentX - (i), currentY + y);
-                                    }
-                                }
-                            }
                         }
                     }
                 }
@@ -194,7 +188,8 @@ window.onload = function () {
         }
         else {
             var name = prompt("You Lost! Enter your name to record your score:", "Name");
-            if (name != null){
+            if (name != null) {
+                localStorage.setItem(name, score);
                 alert(name);
             }
         }
@@ -212,7 +207,7 @@ window.onload = function () {
                     }
                 }
             }
-            console.log(currentY);
+            //console.log(currentY);
             ycount++;
         }
         else {
@@ -378,12 +373,14 @@ window.onload = function () {
                     if (tempSet > offSet) {
                         offSet = tempSet;
                     }
-                    console.log(offSet);
+                    //console.log(offSet);
                     tempSet = 0;
                 }
                 //console.log(offSet);
                 if ((currentX + (offSet)) < 8) {
-                    currentX++;
+                    if (checkTurn) {
+                        currentX++;
+                    }
                     render();
                 }
                 //context.stroke;
@@ -394,7 +391,9 @@ window.onload = function () {
             case 37:
                 roundRectFill(55, 370, 50, 50, 10);
                 if (currentX > 0) {
-                    currentX--;
+                    if (checkTurn) {
+                        currentX--;
+                    }
                     render();
                 }
                 //context.stroke;
@@ -407,9 +406,9 @@ window.onload = function () {
                 //context.stroke;
                 rotateBlock();
                 render();
-                console.log(current);
-                console.log(currentY);
-                console.log(currentX);
+                //console.log(current);
+                //console.log(currentY);
+                //console.log(currentX);
                 setTimeout(function () {
                     roundRect(125, 300, 50, 50, 10);
                 }, 200);
@@ -417,14 +416,69 @@ window.onload = function () {
             case 40:
                 roundRectFill(125, 370, 50, 50, 10);
                 //context.stroke;
-                if(currentY < 17) {
-                    currentY++;
+                if (currentY < 17) {
+                    if (checkTurn) {
+                        currentY++;
+                    }
                     render();
                 }
                 setTimeout(function () {
                     roundRect(125, 370, 50, 50, 10);
                 }, 200);
                 break;
+            case 32:
+                start();
+                isStarted = true;
+                break;
+            case 76:
+                if (isLeadVisible) {
+                    document.getElementById("leaderCanvas").style.display = "none";
+                    isLeadVisible = false;
+                }
+                else {
+                    renderContext.clearRect(0, 0, 300, 600);
+                    document.getElementById("leaderCanvas").style.display = "inline";
+                    leaderContext.font = "bold 40px Arial";
+                    leaderContext.fillText("Leaderboard", 30, 37);
+                    printLeaderBoard();
+                    isLeadVisible = true;
+                }
+                break;
+        }
+    }
+
+    //http://stackoverflow.com/questions/16096872/how-to-sort-2-dimensional-array-by-column-value
+    function printLeaderBoard() {
+        var yLabelPos = 97;
+        var a = [];
+        for (var y = 0; y < localStorage.length; ++y) {
+            a[y] = [];
+            for (var x = 0; x < localStorage.length; ++x) {
+                a[y][x] = 0;
+            }
+        }
+        for (var i = 0, len = localStorage.length; i < len; i++) {
+            var key = localStorage.key(i);
+            var value = localStorage[key];
+            a[i][1] = key;
+            a[i][0] = value;
+            console.log(key + " => " + value);
+        }
+        a.sort(sortFunction);
+        console.log(a);
+        for (var i = 0; i < a.length; i++) {
+            leaderContext.font = "bold 20px Arial";
+            leaderContext.fillText(a[i][1] + ": " + a[i][0], 20, yLabelPos);
+            yLabelPos = yLabelPos + 30;
+        }
+    }
+
+    function sortFunction(a, b) {
+        if (a[0] === b[0]) {
+            return 0;
+        }
+        else {
+            return (a[0] > b[0]) ? -1 : 1;
         }
     }
 
@@ -515,14 +569,30 @@ window.onload = function () {
         controlContext.fillText("Score: ", 110, 480);
         controlContext.font = "bold 23px Arial";
         controlContext.fillText("0", 188, 482);
+    }
 
+    function generateWelcome(){
+        context.font = controlContext.font = "bold 30px Arial";
+        context.fillText("Welcome to Tetris!", 20, 150);
+        context.font = controlContext.font = "bold 30px Arial";
+        context.fillText("Press The Space", 30, 290);
+        context.font = controlContext.font = "bold 30px Arial";
+        context.fillText("Bar To Start", 70, 330);
+    }
 
+    function start() {
+        if (isStarted) {
+
+        }
+        else {
+            newShape();
+            render();
+            makeTurn();
+        }
     }
 
     init();
-    newShape();
-    render();
-    makeTurn();
     generateButtons();
+    generateWelcome();
 
 }
