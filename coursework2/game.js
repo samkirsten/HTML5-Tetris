@@ -12,11 +12,33 @@ window.onload = function () {
     var controlCanvas = document.getElementById("controlCanvas");
     var renderCanvas = document.getElementById("myCanvas");
     var leaderCanvas = document.getElementById('leaderCanvas');
+    var videoCanvas = document.getElementById('videoCanvas');
 
     var context = gameCanvas.getContext("2d");
     var controlContext = controlCanvas.getContext("2d");
     var renderContext = renderCanvas.getContext("2d");
     var leaderContext = leaderCanvas.getContext("2d");
+    var videoContext = videoCanvas.getContext("2d");
+
+    var video = document.getElementById('video');
+    var line = document.getElementById('line');
+    var end = document.getElementById('end');
+    var theme = document.getElementById('theme');
+
+    video.addEventListener('loadedmetadata', function() {
+        videoCanvas.width = video.videoWidth;
+        videoCanvas.height = video.videoHeight;
+    });
+
+    video.addEventListener('play', function() {
+        var $this = this; //cache
+        (function loop() {
+            if (!$this.paused && !$this.ended) {
+                videoContext.drawImage($this, 0, 600);
+                setTimeout(loop, 1000 / 30); // drawing at 30fps
+            }
+        })();
+    }, 0);
 
     var BLOCK_W = 300 / 10, BLOCK_H = 600 / 20;
 
@@ -28,6 +50,7 @@ window.onload = function () {
 
     var isStarted = false;
     var isLeadVisible = false;
+    var isVideoVisible = false;
 
     /**
      var xGameArray = [];
@@ -187,6 +210,8 @@ window.onload = function () {
             }
         }
         else {
+            end.play();
+            theme.pause();
             var name = prompt("You Lost! Enter your name to record your score:", "Name");
             if (name != null) {
                 localStorage.setItem(name, score);
@@ -257,6 +282,7 @@ window.onload = function () {
                         board[i][j] = board[i - 1][j];
                     }
                 }
+                line.play();
                 score++;
                 controlContext.clearRect(180, 458, 50, 50);
                 controlContext.font = "bold 23px Arial";
@@ -271,34 +297,6 @@ window.onload = function () {
         var shapeCount = 0;
         var boardCount = 0;
         var loss = false;
-        /**
-        if(currentX < 4) {
-            for (var y = 0; y < 4; y++) {
-                for (var x = 0; x < 4; x++) {
-                    if (current[y][x] > 0) {
-                        shapeCount++;
-                    }
-                    if (board[currentY + y][x] > 0) {
-                        boardCount++;
-                    }
-                }
-                if (shapeCount >= boardCount) {
-                    loss = true;
-                }
-                shapeCount = 0;
-                boardCount = 0;
-            }
-            if (loss) {
-                return true;
-            }
-            else {
-                return false;
-            }
-        }
-        else{
-            return false;
-        }
-        **/
         if(currentX < 4) {
             for (var y = 0; y < 4; y++) {
                 for (var x = 0; x < 4; x++) {
@@ -408,7 +406,7 @@ window.onload = function () {
                 render();
                 //console.log(current);
                 //console.log(currentY);
-                //console.log(currentX);
+                console.log(currentX);
                 setTimeout(function () {
                     roundRect(125, 300, 50, 50, 10);
                 }, 200);
@@ -428,6 +426,7 @@ window.onload = function () {
                 break;
             case 32:
                 start();
+                theme.play();
                 isStarted = true;
                 break;
             case 76:
@@ -436,12 +435,28 @@ window.onload = function () {
                     isLeadVisible = false;
                 }
                 else {
-                    renderContext.clearRect(0, 0, 300, 600);
+                    leaderContext.clearRect(0, 0, 300, 600);
                     document.getElementById("leaderCanvas").style.display = "inline";
                     leaderContext.font = "bold 40px Arial";
                     leaderContext.fillText("Leaderboard", 30, 37);
                     printLeaderBoard();
                     isLeadVisible = true;
+                }
+                break;
+            case 72:
+                if (isVideoVisible) {
+                    document.getElementById("videoCanvas").style.display = "none";
+                    video.pause();
+                    isVideoVisible = false;
+                }
+                else {
+                    videoContext.clearRect(0, 600, 900, 300);
+                    document.getElementById("videoCanvas").style.display = "inline";
+                    video.play();
+                    //leaderContext.font = "bold 40px Arial";
+                    //leaderContext.fillText("Leaderboard", 30, 37);
+                    //loop();
+                    isVideoVisible = true;
                 }
                 break;
         }
@@ -471,6 +486,21 @@ window.onload = function () {
             leaderContext.fillText(a[i][1] + ": " + a[i][0], 20, yLabelPos);
             yLabelPos = yLabelPos + 30;
         }
+    }
+
+    function loop() {
+
+        toggle = !toggle;
+        if (toggle) {
+            if (!v.paused) requestAnimationFrame(loop);
+            return;
+        }
+
+        /// draw video frame every 1/30 frame
+        videoContext.drawImage(v, 0, 600);
+
+        /// loop if video is playing
+        if (!v.paused) requestAnimationFrame(loop);
     }
 
     function sortFunction(a, b) {
@@ -525,23 +555,24 @@ window.onload = function () {
 
 
         //Control Buttons
-        roundRect(125, 300, 50, 50, 10);
         roundRect(125, 370, 50, 50, 10);
-        roundRect(55, 370, 50, 50, 10);
-        roundRect(195, 370, 50, 50, 10);
+        roundRect(125, 440, 50, 50, 10);
+        roundRect(55, 440, 50, 50, 10);
+        roundRect(195, 440, 50, 50, 10);
 
         controlContext.font = "bold 14px Arial";
-        controlContext.fillText("Rotate", 128, 330);
+        controlContext.fillText("Rotate", 128, 400);
         controlContext.font = "bold 14px Arial";
-        controlContext.fillText("Left", 67, 400);
+        controlContext.fillText("Left", 67, 470);
         controlContext.font = "bold 14px Arial";
-        controlContext.fillText("Right", 202, 400);
+        controlContext.fillText("Right", 202, 470);
         controlContext.font = "bold 14px Arial";
-        controlContext.fillText("Down", 131, 400);
+        controlContext.fillText("Down", 131, 470);
 
         //Menu Buttons
         roundRect(75, 60, 150, 50, 10);
         roundRect(75, 130, 150, 50, 10);
+        roundRect(75, 200, 150, 50, 10);
 
         controlContext.font = "bold 30px Arial";
         controlContext.fillText("Start", 117, 96);
@@ -549,26 +580,29 @@ window.onload = function () {
         controlContext.font = "bold 23px Arial";
         controlContext.fillText("Leaderboard", 80, 165);
 
+        controlContext.font = "bold 23px Arial";
+        controlContext.fillText("Help Video", 92, 235);
+
         //Level Buttons
-        roundRect(15, 200, 70, 50, 10);
-        roundRect(115, 200, 70, 50, 10);
-        roundRect(215, 200, 70, 50, 10);
+        roundRect(15, 270, 70, 50, 10);
+        roundRect(115, 270, 70, 50, 10);
+        roundRect(215, 270, 70, 50, 10);
 
         controlContext.font = "bold 19px Arial";
-        controlContext.fillText("Easy", 27, 230);
+        controlContext.fillText("Easy", 27, 300);
 
         controlContext.font = "bold 19px Arial";
-        controlContext.fillText("Hard", 127, 230);
+        controlContext.fillText("Hard", 127, 300);
 
         controlContext.font = "bold 19px Arial";
-        controlContext.fillText("****", 227, 230);
+        controlContext.fillText("****", 227, 300);
 
         //Score
 
         controlContext.font = "bold 23px Arial";
-        controlContext.fillText("Score: ", 110, 480);
+        controlContext.fillText("Score: ", 110, 550);
         controlContext.font = "bold 23px Arial";
-        controlContext.fillText("0", 188, 482);
+        controlContext.fillText("0", 188, 552);
     }
 
     function generateWelcome(){
