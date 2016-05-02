@@ -52,6 +52,8 @@ window.onload = function () {
     var isLeadVisible = false;
     var isVideoVisible = false;
 
+    var timeout = 300;
+
     /**
      var xGameArray = [];
      var yGameArray = [];
@@ -183,7 +185,7 @@ window.onload = function () {
                 //checkLine();
                 setTimeout(function () {
                     makeTurn();
-                }, 300);
+                }, timeout);
             }
             else {
                 if (!full) {
@@ -356,8 +358,32 @@ window.onload = function () {
 
     function whatKey(evt) {
         switch (evt.keyCode) {
+            case 49:
+                if(isStarted){
+
+                }
+                else{
+                    timeout = 300;
+                }
+                break;
+            case 50:
+                if(isStarted){
+
+                }
+                else{
+                    timeout = 200;
+                }
+                break;
+            case 51:
+                if(isStarted){
+
+                }
+                else{
+                    timeout = 100;
+                }
+                break;
             case 39:
-                roundRectFill(195, 370, 50, 50, 10);
+                roundRectFill(195, 440, 50, 50, 10);
                 var offSet = 0;
                 var tempSet = 0;
                 for (var y = 0; y < 4; ++y) {
@@ -383,11 +409,11 @@ window.onload = function () {
                 }
                 //context.stroke;
                 setTimeout(function () {
-                    roundRect(195, 370, 50, 50, 10);
+                    roundRect(195, 440, 50, 50, 10);
                 }, 200);
                 break;
             case 37:
-                roundRectFill(55, 370, 50, 50, 10);
+                roundRectFill(55, 440, 50, 50, 10);
                 if (currentX > 0) {
                     if (checkTurn) {
                         currentX--;
@@ -396,11 +422,11 @@ window.onload = function () {
                 }
                 //context.stroke;
                 setTimeout(function () {
-                    roundRect(55, 370, 50, 50, 10);
+                    roundRect(55, 440, 50, 50, 10);
                 }, 200);
                 break;
             case 38:
-                roundRectFill(125, 300, 50, 50, 10);
+                roundRectFill(125, 370, 50, 50, 10);
                 //context.stroke;
                 rotateBlock();
                 render();
@@ -408,11 +434,11 @@ window.onload = function () {
                 //console.log(currentY);
                 console.log(currentX);
                 setTimeout(function () {
-                    roundRect(125, 300, 50, 50, 10);
+                    roundRect(125, 370, 50, 50, 10);
                 }, 200);
                 break;
             case 40:
-                roundRectFill(125, 370, 50, 50, 10);
+                roundRectFill(125, 440, 50, 50, 10);
                 //context.stroke;
                 if (currentY < 17) {
                     if (checkTurn) {
@@ -421,7 +447,7 @@ window.onload = function () {
                     render();
                 }
                 setTimeout(function () {
-                    roundRect(125, 370, 50, 50, 10);
+                    roundRect(125, 440, 50, 50, 10);
                 }, 200);
                 break;
             case 32:
@@ -452,7 +478,7 @@ window.onload = function () {
                 else {
                     videoContext.clearRect(0, 600, 900, 300);
                     document.getElementById("videoCanvas").style.display = "inline";
-                    video.play();
+                    video.play();hh
                     //leaderContext.font = "bold 40px Arial";
                     //leaderContext.fillText("Leaderboard", 30, 37);
                     //loop();
@@ -492,15 +518,15 @@ window.onload = function () {
 
         toggle = !toggle;
         if (toggle) {
-            if (!v.paused) requestAnimationFrame(loop);
+            if (!video.paused) requestAnimationFrame(loop);
             return;
         }
 
         /// draw video frame every 1/30 frame
-        videoContext.drawImage(v, 0, 600);
+        videoContext.drawImage(video, 0, 600);
 
         /// loop if video is playing
-        if (!v.paused) requestAnimationFrame(loop);
+        if (!video.paused) requestAnimationFrame(loop);
     }
 
     function sortFunction(a, b) {
