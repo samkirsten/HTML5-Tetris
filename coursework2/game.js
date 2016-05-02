@@ -54,6 +54,10 @@ window.onload = function () {
 
     var timeout = 300;
 
+    var rotated = 0;
+    var devil = false;
+    var loss=0;
+
     /**
      var xGameArray = [];
      var yGameArray = [];
@@ -109,21 +113,25 @@ window.onload = function () {
         }
     }
 
+//Draws the blocks
     function drawBlock(x, y) {
         context.fillRect(BLOCK_W * x, BLOCK_H * y, BLOCK_W - 1, BLOCK_H - 1);
         context.strokeRect(BLOCK_W * x, BLOCK_H * y, BLOCK_W - 1, BLOCK_H - 1);
     }
 
+//Draws the main board
     function drawBoard(x, y) {
         renderContext.fillRect(BLOCK_W * x, BLOCK_H * y, BLOCK_W - 1, BLOCK_H - 1);
         renderContext.strokeRect(BLOCK_W * x, BLOCK_H * y, BLOCK_W - 1, BLOCK_H - 1);
     }
 
+//Erases a block
     function eraseBlock(x, y) {
         context.fillRect(BLOCK_W * x, BLOCK_H * y, BLOCK_W - 1, BLOCK_H - 1);
         //context.strokeRect( BLOCK_W * x, BLOCK_H * y, BLOCK_W - 1 , BLOCK_H - 1 );
     }
 
+//Updates the canvas so all objects are in the right place
     function render() {
         context.clearRect(0, 0, 300, 600);
         controlContext.clearRect(400, 0, 300, 600);
@@ -151,14 +159,18 @@ window.onload = function () {
         }
     }
 
+    /**
+     *
+     * GAME LOGIC
+     *
+     * Logic to run the game, check for errors and a loss.
+     *
+     */
+
     function makeTurn(){ 
         checkLine();
         if (ycount < 2) {
-            //console.log("shit goes down");
             if (checkTurn() && !checkLoss()) {
-                //console.log(currentY);
-                //context.fillStyle = 'red';
-                //context.strokeStyle = 'white';
                 for (var y = 0; y < 4; ++y) {
                     for (var x = 0; x < 4; ++x) {
                         if (current[y][x]) {
@@ -168,9 +180,6 @@ window.onload = function () {
                     }
                 }
 
-
-                context.fillStyle = 'red';
-                context.strokeStyle = 'black';
                 for (var y = 0; y < 4; ++y) {
                     for (var x = 0; x < 4; ++x) {
                         if (current[y][x]) {
@@ -182,7 +191,6 @@ window.onload = function () {
                 currentY++;
                 ycount = 0;
                 checkLine();
-                //checkLine();
                 setTimeout(function () {
                     makeTurn();
                 }, timeout);
@@ -192,16 +200,13 @@ window.onload = function () {
                     for (var y = 0; y < 4; ++y) {
                         for (var x = 0; x < 4; ++x) {
                             if (current[y][x]) {
-                                //console.log(current[y][x]-1);
                                 board[y + currentY][x + currentX] = current[y][x];
                             }
                         }
                     }
-                    //console.log(board);
                     checkLine();
                     newShape();
                     if (!checkLoss()) {
-                        //console.log(currentY);
                         render();
                         makeTurn();
                     }
@@ -214,10 +219,59 @@ window.onload = function () {
         else {
             end.play();
             theme.pause();
+            generateLoss();
             var name = prompt("You Lost! Enter your name to record your score:", "Name");
             if (name != null) {
                 localStorage.setItem(name, score);
                 alert(name);
+            }
+        }
+    }
+
+    function incTurn(){
+        checkLine();
+        if (ycount < 2) {
+            if (checkTurn() && !checkLoss()) {
+                for (var y = 0; y < 4; ++y) {
+                    for (var x = 0; x < 4; ++x) {
+                        if (current[y][x]) {
+                            context.fillStyle = 'white';
+                            eraseBlock(currentX + x, currentY + y);
+                        }
+                    }
+                }
+
+                for (var y = 0; y < 4; ++y) {
+                    for (var x = 0; x < 4; ++x) {
+                        if (current[y][x]) {
+                            context.fillStyle = colors[current[y][x] - 1];
+                            drawBlock(currentX + x, currentY + y + 1);
+                        }
+                    }
+                }
+                currentY++;
+                ycount = 0;
+                checkLine();
+            }
+            else {
+                if (!full) {
+                    for (var y = 0; y < 4; ++y) {
+                        for (var x = 0; x < 4; ++x) {
+                            if (current[y][x]) {
+                                board[y + currentY][x + currentX] = current[y][x];
+                            }
+                        }
+                    }
+                    checkLine();
+                    newShape();
+                    if (!checkLoss()) {
+                        render();
+                        //makeTurn();
+                    }
+                    else {
+                        console.log("LOSER");
+                    }
+                }
             }
         }
     }
@@ -234,7 +288,6 @@ window.onload = function () {
                     }
                 }
             }
-            //console.log(currentY);
             ycount++;
         }
         else {
@@ -274,9 +327,7 @@ window.onload = function () {
                 console.log("Bingo");
                 for (var x = 0; x < 10; x++) {
                     board[y][x] = 0;
-                    //board[y].splice(0, x);
                 }
-                //board.unshift(0);
 
                 for (var i = y; i > 0; i--) {
                     for (var j = 0; j < 10; j++) {
@@ -286,10 +337,9 @@ window.onload = function () {
                 }
                 line.play();
                 score++;
-                controlContext.clearRect(180, 458, 50, 50);
+                controlContext.clearRect(180, 528, 50, 50);
                 controlContext.font = "bold 23px Arial";
-                controlContext.fillText(score, 188, 482);
-                //console.log(score);
+                controlContext.fillText(score, 188, 552);
             }
         }
         render();
@@ -323,6 +373,14 @@ window.onload = function () {
     }
 
     function rotateBlock() {
+        console.log(current);
+        if (rotated >= 0 && rotated <= 3){
+            rotated++;
+        }
+        else if(rotated = 3){
+            rotated = 0;
+        }
+
         var tempPos = [];
         for (var y = 0; y < 4; ++y) {
             tempPos[y] = [];
@@ -330,10 +388,16 @@ window.onload = function () {
                 tempPos[y][x] = current[3 - x][y];
             }
         }
+
         current = tempPos;
+        console.log(current);
     }
 
     function newShape() {
+        if(devil){
+            summonTheDevil();
+        }
+        rotated = 0;
         var id = Math.floor(Math.random() * shapes.length);
         var shape = shapes[id]; // maintain id for color filling
 
@@ -350,11 +414,15 @@ window.onload = function () {
                 }
             }
         }
-        //console.log(current);
         currentX = 3;
         currentY = 0;
-        //console.log(board);
     }
+
+    function summonTheDevil(){
+        timeout = Math.floor(Math.random() * 200) + 5;
+    }
+
+
 
     function whatKey(evt) {
         switch (evt.keyCode) {
@@ -379,7 +447,8 @@ window.onload = function () {
 
                 }
                 else{
-                    timeout = 100;
+                   devil = true;
+                   summonTheDevil();
                 }
                 break;
             case 39:
@@ -397,41 +466,38 @@ window.onload = function () {
                     if (tempSet > offSet) {
                         offSet = tempSet;
                     }
-                    //console.log(offSet);
                     tempSet = 0;
                 }
-                //console.log(offSet);
                 if ((currentX + (offSet)) < 8) {
                     if (checkTurn) {
                         currentX++;
                     }
                     render();
                 }
-                //context.stroke;
                 setTimeout(function () {
                     roundRect(195, 440, 50, 50, 10);
                 }, 200);
                 break;
             case 37:
                 roundRectFill(55, 440, 50, 50, 10);
-                if (currentX > 0) {
+                var rotationIndex = 0;
+                if (rotated > 0){
+                    rotationIndex = -2;
+                }
+                if (currentX > rotationIndex) {
                     if (checkTurn) {
                         currentX--;
                     }
                     render();
                 }
-                //context.stroke;
                 setTimeout(function () {
                     roundRect(55, 440, 50, 50, 10);
                 }, 200);
                 break;
             case 38:
                 roundRectFill(125, 370, 50, 50, 10);
-                //context.stroke;
                 rotateBlock();
                 render();
-                //console.log(current);
-                //console.log(currentY);
                 console.log(currentX);
                 setTimeout(function () {
                     roundRect(125, 370, 50, 50, 10);
@@ -439,13 +505,7 @@ window.onload = function () {
                 break;
             case 40:
                 roundRectFill(125, 440, 50, 50, 10);
-                //context.stroke;
-                if (currentY < 17) {
-                    if (checkTurn) {
-                        currentY++;
-                    }
-                    render();
-                }
+                incTurn();
                 setTimeout(function () {
                     roundRect(125, 440, 50, 50, 10);
                 }, 200);
@@ -454,6 +514,14 @@ window.onload = function () {
                 start();
                 theme.play();
                 isStarted = true;
+                break;
+            case 82:
+                if (loss) {
+                    location.reload();
+                }
+                break;
+            case 77:
+                theme.pause();
                 break;
             case 76:
                 if (isLeadVisible) {
@@ -472,16 +540,15 @@ window.onload = function () {
             case 72:
                 if (isVideoVisible) {
                     document.getElementById("videoCanvas").style.display = "none";
+                    document.getElementById("video").style.visibility='hidden';
                     video.pause();
                     isVideoVisible = false;
                 }
                 else {
                     videoContext.clearRect(0, 600, 900, 300);
-                    document.getElementById("videoCanvas").style.display = "inline";
-                    video.play();hh
-                    //leaderContext.font = "bold 40px Arial";
-                    //leaderContext.fillText("Leaderboard", 30, 37);
-                    //loop();
+                    //document.getElementById("videoCanvas").style.display = "inline";
+                    document.getElementById("video").style.visibility='visible';
+                    video.play();
                     isVideoVisible = true;
                 }
                 break;
@@ -596,32 +663,32 @@ window.onload = function () {
         controlContext.fillText("Down", 131, 470);
 
         //Menu Buttons
-        roundRect(75, 60, 150, 50, 10);
-        roundRect(75, 130, 150, 50, 10);
-        roundRect(75, 200, 150, 50, 10);
+        roundRect(50, 60, 200, 50, 10);
+        roundRect(50, 130, 200, 50, 10);
+        roundRect(50, 200, 200, 50, 10);
 
         controlContext.font = "bold 30px Arial";
-        controlContext.fillText("Start", 117, 96);
+        controlContext.fillText("Start (space)", 63, 96);
 
         controlContext.font = "bold 23px Arial";
-        controlContext.fillText("Leaderboard", 80, 165);
+        controlContext.fillText("Leaderboard (l)", 67, 165);
 
         controlContext.font = "bold 23px Arial";
-        controlContext.fillText("Help Video", 92, 235);
+        controlContext.fillText("Help Video (h)", 76, 235);
 
         //Level Buttons
         roundRect(15, 270, 70, 50, 10);
         roundRect(115, 270, 70, 50, 10);
         roundRect(215, 270, 70, 50, 10);
 
-        controlContext.font = "bold 19px Arial";
-        controlContext.fillText("Easy", 27, 300);
+        controlContext.font = "bold 16px Arial";
+        controlContext.fillText("Easy (1)", 20, 300);
 
-        controlContext.font = "bold 19px Arial";
-        controlContext.fillText("Hard", 127, 300);
+        controlContext.font = "bold 16px Arial";
+        controlContext.fillText("Hard (2)", 120, 300);
 
-        controlContext.font = "bold 19px Arial";
-        controlContext.fillText("****", 227, 300);
+        controlContext.font = "bold 16px Arial";
+        controlContext.fillText("Hmm (3)", 218, 300);
 
         //Score
 
@@ -638,6 +705,20 @@ window.onload = function () {
         context.fillText("Press The Space", 30, 290);
         context.font = controlContext.font = "bold 30px Arial";
         context.fillText("Bar To Start", 70, 330);
+    }
+
+    function generateLoss(){
+        context.clearRect(0, 0, 300, 600);
+        controlContext.clearRect(400, 0, 300, 600);
+        renderContext.clearRect(0, 0, 300, 600);
+        context.font = controlContext.font = "bold 30px Arial";
+        context.fillText("You Lost the Game!", 15, 150);
+        context.font = controlContext.font = "bold 30px Arial";
+        context.fillText("Press The R Key", 30, 290);
+        context.font = controlContext.font = "bold 30px Arial";
+        context.fillText("To Restart", 70, 330);
+        isStarted = false;
+        loss = true;
     }
 
     function start() {
